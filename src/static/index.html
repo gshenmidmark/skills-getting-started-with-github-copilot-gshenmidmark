@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mergington High School Activities</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .activities-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .activity-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .activity-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .activity-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .activity-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .activity-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9em;
+        }
+        
+        .detail-value {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .signup-section {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .signup-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .signup-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .signup-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .signup-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s ease;
+        }
+        
+        .signup-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .signup-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .status-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .spots-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .spots-available {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .spots-low {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .spots-full {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎓 Mergington High School</h1>
+        <p>Extracurricular Activities Portal</p>
+    </div>
+
+    <div id="activities-container" class="activities-container">
+        <!-- Activities will be loaded here -->
+    </div>
+
+    <script>
+        async function loadActivities() {
+            try {
+                const response = await fetch('/activities');
+                const activities = await response.json();
+                displayActivities(activities);
+            } catch (error) {
+                console.error('Error loading activities:', error);
+            }
+        }
+
+        function displayActivities(activities) {
+            const container = document.getElementById('activities-container');
+            container.innerHTML = '';
+
+            for (const [name, activity] of Object.entries(activities)) {
+                const activityCard = createActivityCard(name, activity);
+                container.appendChild(activityCard);
+            }
+        }
+
+        function createActivityCard(name, activity) {
+            const card = document.createElement('div');
+            card.className = 'activity-card';
+
+            const spotsRemaining = activity.spots_remaining;
+            let spotsClass = 'spots-available';
+            if (spotsRemaining === 0) spotsClass = 'spots-full';
+            else if (spotsRemaining <= 3) spotsClass = 'spots-low';
+
+            card.innerHTML = `
+                <div class="activity-title">${name}</div>
+                <div class="activity-description">${activity.description}</div>
+                <div class="activity-details">
+                    <div class="detail-item">
+                        <div class="detail-label">📅 Schedule</div>
+                        <div class="detail-value">${activity.schedule}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">👥 Participants</div>
+                        <div class="detail-value">${activity.current_participants} / ${activity.max_participants}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">🎯 Availability</div>
+                        <div class="detail-value">
+                            <span class="spots-indicator ${spotsClass}">
+                                ${spotsRemaining > 0 ? `${spotsRemaining} spots left` : 'Full'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="signup-section">
+                    <div class="signup-form">
+                        <input type="email" 
+                               class="signup-input" 
+                               placeholder="Enter your school email" 
+                               id="email-${name.replace(/\s+/g, '-')}"
+                               ${spotsRemaining === 0 ? 'disabled' : ''}>
+                        <button class="signup-btn" 
+                                onclick="signupForActivity('${name}')"
+                                ${spotsRemaining === 0 ? 'disabled' : ''}>
+                            ${spotsRemaining === 0 ? 'Full' : 'Sign Up'}
+                        </button>
+                    </div>
+                    <div class="status-message" id="status-${name.replace(/\s+/g, '-')}"></div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        async function signupForActivity(activityName) {
+            const emailInput = document.getElementById(`email-${activityName.replace(/\s+/g, '-')}`);
+            const statusDiv = document.getElementById(`status-${activityName.replace(/\s+/g, '-')}`);
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                showStatus(statusDiv, 'Please enter your email address', 'error');
+                return;
+            }
+
+            if (!email.includes('@') || !email.includes('.')) {
+                showStatus(statusDiv, 'Please enter a valid email address', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/activities/${encodeURIComponent(activityName)}/signup?email=${encodeURIComponent(email)}`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showStatus(statusDiv, result.message, 'success');
+                    emailInput.value = '';
+                    // Reload activities to update counts
+                    setTimeout(loadActivities, 1000);
+                } else {
+                    showStatus(statusDiv, result.detail || 'Signup failed', 'error');
+                }
+            } catch (error) {
+                showStatus(statusDiv, 'Network error. Please try again.', 'error');
+                console.error('Signup error:', error);
+            }
+        }
+
+        function showStatus(statusDiv, message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load activities when page loads
+        loadActivities();
+    </script>
+</body>
+</html>
